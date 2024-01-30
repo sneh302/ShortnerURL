@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
-const port = 3000; // You can change this port as needed
+const port = 3000;
 
 const corsOptions = {
     origin: "http://localhost:3001",
@@ -25,6 +25,10 @@ const shortnerSchema = mongoose.Schema({
     shortURL_id: {
         type: String,
         required: true,
+    },
+    clickCount: {
+        type: Number,
+        default: 0,
     },
 });
 
@@ -71,7 +75,34 @@ app.post("/getLongURL", async (req, res) => {
     });
 
     if (foundObject) {
+        ShortnerURLModel.updateOne(
+            { shortURL_id: shortUrlId },
+            {
+                clickCount: foundObject.clickCount + 1,
+            }
+        );
         res.json({ redirectUrl: foundObject.longURL });
+    } else {
+        res.json({ notFound: true });
+    }
+});
+
+app.post("/getCount", async (req, res) => {
+    const shortUrlId = req.body.shortUrlId;
+
+    if (!shortUrlId) {
+        res.json({ error: "shortUrlId required" });
+        return;
+    }
+
+    const foundObject = await ShortnerURLModel.findOne({
+        shortURL_id: shortUrlId,
+    });
+
+    if (foundObject) {
+        res.json({
+            clickCount: foundObject.clickCount,
+        });
     } else {
         res.json({ notFound: true });
     }

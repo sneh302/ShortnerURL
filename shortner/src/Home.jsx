@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "./Home.css";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
 
 function Home() {
     const [isLoading, setIsLoading] = useState(false);
